@@ -4,43 +4,37 @@ using System.IO;
 
 namespace WinFormsApp1
 {
-    public class Parcel
+    public class Parcel : ISendable // Пункт 1: Реалізація інтерфейсу
     {
-        // Пункт 3: Властивості get, set
         public double Weight { get; set; }
         public DateTime SendDate { get; set; }
         public DateTime DeliveryDate { get; set; }
         public decimal Price { get; set; }
-
-        // Пункт 12: Статичний зв’язний список
         public static LinkedList<Parcel> ParcelList = new LinkedList<Parcel>();
 
-        // Пункт 4: Конструктор без параметрів
-        public Parcel() { }
+        public Parcel()
+        {
+        }
 
-        // Пункт 4: Конструктор з параметрами
         public Parcel(double weight, DateTime sendDate, DateTime deliveryDate, decimal price)
         {
             Weight = weight;
             SendDate = sendDate;
             DeliveryDate = deliveryDate;
             Price = price;
-            ParcelList.AddLast(this); // Додаємо до статичного списку
+            ParcelList.AddLast(this);
         }
 
-        // Пункт 9: Віртуальна функція
         public virtual void Send()
         {
             Console.WriteLine($"Parcel sent: {Weight}kg, Price: {Price}");
         }
 
-        // Пункт 11: Запис у файл
         public void SaveToFile(string path)
         {
             File.WriteAllText(path, $"{Weight},{SendDate},{DeliveryDate},{Price}");
         }
 
-        // Пункт 11: Читання з файлу
         public static Parcel LoadFromFile(string path)
         {
             var data = File.ReadAllText(path).Split(',');
@@ -52,12 +46,28 @@ namespace WinFormsApp1
             );
         }
 
-        // Пункт 12: Статичний метод перегляду списку
         public static void DisplayParcelList()
         {
             foreach (var parcel in ParcelList)
             {
                 Console.WriteLine($"Parcel: {parcel.Weight}kg, {parcel.Price}");
+            }
+        }
+
+        // Пункт 1: Реалізація методу інтерфейсу
+        public decimal CalculateCost()
+        {
+            return Price + (decimal)Weight * 10m;
+        }
+
+        // Пункт 4: Індексатор
+        public int this[int index]
+        {
+            get => index == 0 ? (int)Weight : (int)Price;
+            set
+            {
+                if (index == 0) Weight = value;
+                else if (index == 1) Price = value;
             }
         }
     }
