@@ -2,14 +2,15 @@ using MaterialSkin;
 using MaterialSkin.Controls;
 using System;
 using System.Windows.Forms;
+using Microsoft.EntityFrameworkCore;
 
 namespace WinFormsApp1
 {
     public partial class Form1 : MaterialForm
     {
         private readonly MaterialSkinManager materialSkinManager;
+        private readonly AppDbContext dbContext = new AppDbContext();
 
-        // Пункт 2: Делегат
         public delegate void ParcelEventHandler(string message);
 
         public Form1()
@@ -24,67 +25,60 @@ namespace WinFormsApp1
                 Primary.BlueGrey500, Accent.LightBlue200,
                 TextShade.WHITE);
 
-            var sendButton = new MaterialButton { Text = "Send Parcel", Location = new Point(150, 150) };
-            var displayListButton = new MaterialButton { Text = "Display Parcel List", Location = new Point(150, 200) };
-            var calcCostButton = new MaterialButton { Text = "Calculate Cost", Location = new Point(150, 250) };
+            var sendButton = new MaterialButton { Text = "Send Parcel", Location = new Point(10, 10) };
+            var updateButton = new MaterialButton { Text = "Update Parcel", Location = new Point(10, 50) };
+            var deleteButton = new MaterialButton { Text = "Delete Parcel", Location = new Point(10, 90) };
             Controls.Add(sendButton);
-            Controls.Add(displayListButton);
-            Controls.Add(calcCostButton);
+            Controls.Add(updateButton);
+            Controls.Add(deleteButton);
 
             sendButton.Click += SendButton_Click;
-            displayListButton.Click += DisplayListButton_Click;
-            calcCostButton.Click += CalcCostButton_Click;
+            updateButton.Click += UpdateButton_Click;
+            deleteButton.Click += DeleteButton_Click;
 
-            var objects = new object[]
-            {
-                new City("Kyiv"),
-                new PostOffice("Main St"),
-                new Parcel(1.5, DateTime.Now, DateTime.Now.AddDays(2), 50m),
-                new Client("John")
-            };
+            dbContext.Database.EnsureCreated(); // Створюємо БД
         }
 
         private void SendButton_Click(object sender, EventArgs e)
         {
-            var client = new Client("Alice");
             var parcel = new Parcel(2.0, DateTime.Now, DateTime.Now.AddDays(3), 75m);
+            var postOffice = new PostOffice("Main St");
+            parcel.PostOffice = postOffice;
 
-            // Пункт 5: Анонімний метод
-            ParcelEventHandler handler = delegate(string msg) { MessageBox.Show(msg); };
-            handler("Parcel sent anonymously!");
-
-            // Пункт 5: Лямбда-вираз
-            var sendLambda = (Action<Parcel>)(parcel =>
-            {
-                client.SendParcel(parcel);
-                Console.WriteLine("Lambda: Parcel sent");
-            });
-            sendLambda(parcel);
-
-            // Пункт 3: Різні типи параметрів
-            ProcessParcel(ref parcel, out decimal cost, new Parcel[] { parcel }, sendNotification: true);
-            parcel.SaveToFile("parcel.txt");
-            MessageBox.Show($"Parcel sent, cost: {cost}");
+            // Пункт 2: Create
+            dbContext.Parcels.Add(parcel);
+            dbContext.PostOffices.Add(postOffice);
+            dbContext.SaveChanges();
+            MessageBox.Show("Parcel added to DB!");
         }
 
-        // Пункт 3: Метод з різними типами параметрів
+        private void UpdateButton_Click(object sender, EventArgs e)
+        {
+            var parcel = dbContext.Parcels.FirstOrDefault();
+            if (parcel != null)
+            {
+                parcel.Price = 100m; // Пункт 2: Update
+                dbContext.SaveChanges();
+                MessageBox.Show("Parcel updated!");
+            }
+        }
+
+        private void DeleteButton_Click(object sender, EventArgs e)
+        {
+            var parcel = dbContext.Parcels.FirstOrDefault();
+            if (parcel != null)
+            {
+                dbContext.Parcels.Remove(parcel); // Пункт 2: Delete
+                dbContext.SaveChanges();
+                MessageBox.Show("Parcel deleted!");
+            }
+        }
+
         private void ProcessParcel(ref Parcel parcel, out decimal cost, Parcel[] parcels, bool sendNotification = true)
         {
             cost = parcel.CalculateCost();
             if (sendNotification)
                 Console.WriteLine("Notification sent.");
-        }
-
-        private void DisplayListButton_Click(object sender, EventArgs e)
-        {
-            Parcel.DisplayParcelList();
-            MessageBox.Show("Check console for parcel list.");
-        }
-
-        private void CalcCostButton_Click(object sender, EventArgs e)
-        {
-            var parcel = new Parcel(2.0, DateTime.Now, DateTime.Now.AddDays(3), 75m);
-            MessageBox.Show($"Cost: {parcel.CalculateCost()}");
         }
     }
 }

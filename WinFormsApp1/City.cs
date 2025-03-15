@@ -5,6 +5,7 @@ namespace WinFormsApp1
 {
     public class City
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public List<PostOffice> PostOffices { get; set; } = new List<PostOffice>();
 
