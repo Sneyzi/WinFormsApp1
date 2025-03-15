@@ -25,9 +25,9 @@ namespace WinFormsApp1
                 Primary.BlueGrey500, Accent.LightBlue200,
                 TextShade.WHITE);
 
-            var sendButton = new MaterialButton { Text = "Send Parcel", Location = new Point(10, 10) };
-            var updateButton = new MaterialButton { Text = "Update Parcel", Location = new Point(10, 50) };
-            var deleteButton = new MaterialButton { Text = "Delete Parcel", Location = new Point(10, 90) };
+            var sendButton = new MaterialButton { Text = "Send Parcel", Location = new Point(150, 150) };
+            var updateButton = new MaterialButton { Text = "Update Parcel", Location = new Point(150, 200) };
+            var deleteButton = new MaterialButton { Text = "Delete Parcel", Location = new Point(150, 250) };
             Controls.Add(sendButton);
             Controls.Add(updateButton);
             Controls.Add(deleteButton);
